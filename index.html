@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dubai Heights House Competition</title>
+<style>
+:root{
+  --bg1:#070b18; --bg2:#10183a; --gold:#ffd24a; --ink:#f4f6fb;
+  --rowH:clamp(84px,15vh,132px); --side:clamp(70px,9vw,130px); --cs:clamp(56px,7.5vw,108px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg1);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+body{background:radial-gradient(1200px 700px at 50% -10%,#1c2a63 0%,var(--bg2) 45%,var(--bg1) 100%)}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2vh calc(var(--side) + 2.5vw)}
+.screen.active{display:flex}
+button{font:inherit;cursor:pointer;border:0}
+
+/* ---------- Intro ---------- */
+#intro{text-align:center;gap:2.5vh}
+#intro .school{height:clamp(70px,16vh,150px);max-width:60vw;object-fit:contain}
+#intro h1{font-size:clamp(30px,6vw,84px);line-height:1.05;font-weight:900;letter-spacing:.5px;text-transform:uppercase;
+  background:linear-gradient(90deg,#fff,var(--gold),#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#intro .sub{font-size:clamp(16px,2.4vw,30px);opacity:.85}
+#intro .crest{display:flex;gap:clamp(10px,2vw,28px);margin:1vh 0}
+.badge{width:var(--bs,72px);height:var(--bs,72px);border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden;
+  border:4px solid var(--c,#fff);box-shadow:0 0 22px var(--glow,rgba(255,255,255,.4));flex:none}
+.badge img{width:100%;height:100%;object-fit:contain;padding:3px}
+.badge span{font-weight:900;font-size:calc(var(--bs,72px)*.45);color:#111}
+#intro .crest .badge{--bs:clamp(56px,9vw,120px)}
+.go{margin-top:2vh;padding:2vh 4vw;border-radius:999px;font-size:clamp(20px,3vw,40px);font-weight:900;letter-spacing:2px;text-transform:uppercase;
+  color:#1a1200;background:linear-gradient(180deg,#ffe27a,#ffb300);box-shadow:0 8px 0 #a36b00,0 18px 40px rgba(255,190,0,.35);transition:transform .1s,box-shadow .1s}
+.go:hover{transform:translateY(-2px)}
+.go:active{transform:translateY(6px);box-shadow:0 2px 0 #a36b00}
+.hint{font-size:clamp(12px,1.4vw,18px);opacity:.55}
+
+/* ---------- Race ---------- */
+#race{justify-content:flex-start;gap:1.5vh}
+.topbar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:2vw}
+.topbar img{height:clamp(36px,8vh,76px);object-fit:contain}
+.topbar .ttl{text-align:center;flex:1}
+.topbar h2{font-size:clamp(18px,3.2vw,44px);font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.topbar .wk{font-size:clamp(13px,1.8vw,24px);color:var(--gold);font-weight:700}
+.ctl{display:flex;gap:8px}
+.ctl button{background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:8px 12px;font-size:clamp(12px,1.3vw,16px)}
+.ctl button:hover{background:rgba(255,255,255,.22)}
+#ticker{height:clamp(28px,5vh,52px);font-size:clamp(14px,2.2vw,30px);font-weight:800;color:var(--gold);text-align:center;opacity:0;transition:opacity .3s}
+#ticker.show{opacity:1}
+#board{position:relative;width:100%;max-width:1500px;flex:1;min-height:calc(var(--rowH)*4)}
+.row{position:absolute;left:0;right:0;top:0;height:var(--rowH);display:flex;align-items:center;gap:1.2vw;
+  transform:translateY(calc(var(--rank,0)*var(--rowH)));transition:transform .75s cubic-bezier(.3,1.2,.4,1)}
+.rank{width:clamp(28px,4vw,60px);text-align:center;font-weight:900;font-size:clamp(22px,3.6vw,52px);opacity:.9}
+.track{position:relative;flex:1;height:70%}
+.bar{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:14px;background:var(--c);border:3px solid var(--edge,transparent);
+  display:flex;align-items:center;padding-left:1.4vw;color:var(--t,#fff);box-shadow:0 6px 24px var(--glow)}
+.nm2{position:absolute;top:50%;transform:translateY(-50%);font-size:clamp(14px,2.2vw,32px);font-weight:900;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.bar .badge{position:absolute;right:calc(var(--bs)/-2);top:50%;transform:translateY(-50%);--bs:calc(var(--rowH)*.78)}
+.pts{width:clamp(80px,11vw,170px);text-align:right;font-size:clamp(22px,3.8vw,56px);font-weight:900;font-variant-numeric:tabular-nums}
+.lead .pts{color:var(--gold)}
+.lead .bar{filter:brightness(1.08)}
+.prog{width:100%;max-width:1500px;height:clamp(8px,1.4vh,14px);background:rgba(255,255,255,.12);border-radius:99px;position:relative}
+.prog i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:linear-gradient(90deg,#4aa3ff,var(--gold))}
+.prog em{position:absolute;right:-4px;top:-26px;font-style:normal;font-size:24px}
+#count{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,8,20,.72);font-size:clamp(100px,30vw,420px);font-weight:900;color:var(--gold);z-index:5;text-shadow:0 0 60px rgba(255,200,0,.6)}
+#count.on{display:grid}
+#count.pop span{animation:pop .9s ease-out both}
+@keyframes pop{0%{transform:scale(2.2);opacity:0}25%{opacity:1}100%{transform:scale(.9);opacity:.2}}
+#finalflash{position:fixed;inset:0;display:none;place-items:center;font-size:clamp(50px,14vw,200px);font-weight:900;color:#fff;letter-spacing:6px;z-index:4;pointer-events:none;text-shadow:0 0 50px var(--gold)}
+#finalflash.on{display:grid;animation:fin 2.2s ease-out both}
+@keyframes fin{0%{transform:scale(.5);opacity:0}20%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:0}}
+
+/* ---------- Finish ---------- */
+#finish{gap:1.6vh;text-align:center;background:radial-gradient(900px 600px at 50% 15%,var(--wglow,rgba(255,210,74,.35)),transparent 70%)}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+#finish>*:not(canvas){position:relative;z-index:2}
+#finish .school{height:clamp(40px,9vh,86px);object-fit:contain}
+#finish h1{font-size:clamp(28px,6.4vw,92px);font-weight:900;text-transform:uppercase;line-height:1;
+  background:linear-gradient(90deg,#fff,var(--gold),#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#finish .winner{font-size:clamp(22px,4.4vw,62px);font-weight:900;color:var(--wc,#fff);text-shadow:0 0 30px var(--wglow)}
+#finish .winner .badge{--bs:clamp(90px,20vh,200px);margin:0 auto 1vh}
+.stand{width:min(900px,94vw);display:flex;flex-direction:column;gap:clamp(6px,1.2vh,12px)}
+.srow{display:flex;align-items:center;gap:1.4vw;background:rgba(255,255,255,.08);border-radius:16px;padding:clamp(6px,1.1vh,12px) 1.6vw;
+  border-left:8px solid var(--c);opacity:0;transform:translateX(-40px);animation:slide .6s ease-out forwards}
+@keyframes slide{to{opacity:1;transform:none}}
+.srow .n{font-size:clamp(20px,3vw,40px);font-weight:900;width:2ch}
+.srow .badge{--bs:clamp(36px,6.4vh,64px);border-width:3px}
+.srow .nm{flex:1;text-align:left;font-size:clamp(16px,2.6vw,34px);font-weight:800;text-transform:uppercase}
+.srow .gap{font-size:clamp(11px,1.3vw,18px);opacity:.6;margin-right:1vw}
+.srow .p{font-size:clamp(20px,3vw,42px);font-weight:900;font-variant-numeric:tabular-nums}
+.srow:first-child{background:rgba(255,210,74,.18)}
+.fbtn{display:flex;gap:12px;margin-top:1vh}
+.fbtn button{background:rgba(255,255,255,.14);color:#fff;border-radius:12px;padding:10px 18px;font-size:clamp(13px,1.5vw,18px);font-weight:700}
+.fbtn button:hover{background:rgba(255,255,255,.26)}
+
+/* ---------- Side crests ---------- */
+.side{position:fixed;top:0;bottom:0;width:var(--side);display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;z-index:3;pointer-events:none;perspective:700px}
+#sideL{left:1vw}#sideR{right:1vw}
+.coin{width:var(--cs);height:var(--cs);position:relative;transform-style:preserve-3d;animation:spin 7s ease-in-out infinite;animation-delay:var(--d,0s)}
+.coin .badge{--bs:var(--cs);position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.coin .badge:last-child{transform:rotateY(180deg)}
+@keyframes spin{0%,50%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+@media (max-width:800px){.side{display:none}.screen{padding:2vh 3vw}}
+</style>
+</head>
+<body>
+
+<div class="side" id="sideL"></div><div class="side" id="sideR"></div>
+<!-- INTRO -->
+<section id="intro" class="screen active">
+  <img class="school" id="schoolLogoIntro" src="assets/school-logo-white.png" alt="Dubai Heights Academy" onerror="this.style.display='none'">
+  <h1>Dubai Heights<br>House Competition</h1>
+  <div class="crest" id="crest"></div>
+  <div class="sub" id="introSub">Who will take the lead this week?</div>
+  <button class="go" id="startBtn">▶ Start the race</button>
+  <div class="hint">🔊 Turn your sound up!</div>
+</section>
+
+<!-- RACE -->
+<section id="race" class="screen">
+  <div class="topbar">
+    <img src="assets/school-logo-white.png" alt="" onerror="this.style.display='none'">
+    <div class="ttl"><h2>House Competition</h2><div class="wk" id="weekLbl"></div></div>
+    <div class="ctl"><button id="muteBtn">🔊</button><button id="skipBtn">Skip ⏭</button></div>
+  </div>
+  <div id="ticker"></div>
+  <div id="board"></div>
+  <div class="prog"><i id="progFill"></i><em id="progFlag" style="left:0">🏁</em></div>
+</section>
+<div id="count"><span id="countNum">3</span></div>
+<div id="finalflash">FINAL!</div>
+
+<!-- FINISH -->
+<section id="finish" class="screen">
+  <canvas id="confetti"></canvas>
+  <img class="school" src="assets/school-logo-white.png" alt="" onerror="this.style.display='none'">
+  <h1>Congratulations!</h1>
+  <div class="winner" id="winnerBlock"></div>
+  <div class="stand" id="stand"></div>
+  <div class="fbtn"><button id="replayBtn">↺ Replay race</button><button id="muteBtn2">🔊 Sound</button></div>
+</section>
+
+<script>
+/* =====================================================
+   CONFIG  — houses (colours/logos). Points live in points.json
+   ===================================================== */
+const HOUSES = [
+  {id:'wolves',   name:'White Wolves',    short:'W', color:'#f3f5fa', edge:'#9aa6c4', text:'#0b1a33', glow:'rgba(220,230,255,.45)', logo:'assets/wolves.jpeg'},
+  {id:'gazelles', name:'Green Gazelles',  short:'G', color:'#1fab5a', edge:'#7dffb0', text:'#fff',    glow:'rgba(40,220,110,.45)',  logo:'assets/gazelles.jpeg'},
+  {id:'falcons',  name:'Red Falcons',     short:'F', color:'#e1243c', edge:'#ff8a9a', text:'#fff',    glow:'rgba(255,60,80,.5)',    logo:'assets/falcons.jpeg'},
+  {id:'scorpions',name:'Black Scorpions', short:'S', color:'#1d1d26', edge:'#b9b9cc', text:'#fff',    glow:'rgba(180,180,220,.35)', logo:'assets/scorpions.jpeg'}
+];
+const DEFAULT_DATA = {label:'12 Nov 2026', points:{wolves:2474,gazelles:2512,falcons:2637,scorpions:2697}};
+const RACE_SECONDS = 30;   // length of the race
+const HOLD_FINAL_MS = 2600;
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+const $ = s => document.querySelector(s);
+const fmt = n => Math.round(n).toLocaleString('en-US');
+function badge(h, size){
+  const b = document.createElement('div');
+  b.className='badge'; b.style.setProperty('--c',h.edge); b.style.setProperty('--glow',h.glow);
+  if(size) b.style.setProperty('--bs',size);
+  const img = new Image(); img.src=h.logo; img.alt=h.name;
+  img.onerror=()=>{ img.remove(); const s=document.createElement('span'); s.textContent=h.short; b.appendChild(s); };
+  b.appendChild(img); return b;
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id))}
+
+/* =====================================================
+   DATA
+   ===================================================== */
+let DATA = DEFAULT_DATA, hs = [];
+async function loadData(){
+  try{
+    const r = await fetch('points.json?'+Date.now(),{cache:'no-store'});
+    if(r.ok){ const j = await r.json(); if(j && j.points) DATA = j; }
+  }catch(e){ /* file:// or offline: use defaults */ }
+  hs = HOUSES.map(h=>({...h, points:Number(DATA.points[h.id])||0}));
+  $('#weekLbl').textContent = DATA.label ? 'Standings as of '+DATA.label : '';
+  $('#introSub').textContent = DATA.label ? 'Standings as of '+DATA.label : 'Who will take the lead this week?';
+  const crest=$('#crest'); crest.innerHTML=''; hs.forEach(h=>crest.appendChild(badge(h)));
+  buildCurves(); buildSides();
+}
+
+
+function buildSides(){
+  ['#sideL','#sideR'].forEach((sel,si)=>{
+    const el=$(sel); el.innerHTML='';
+    const list=si?[...hs].reverse():hs;
+    list.forEach((h,i)=>{
+      const c=document.createElement('div'); c.className='coin'; c.style.setProperty('--d',(-(i*1.1+si*0.55))+'s');
+      c.appendChild(badge(h)); c.appendChild(badge(h)); el.appendChild(c);
+    });
+  });
+}
+
+/* Race curves: each house's points climb with its own surges but finish EXACTLY on its real total */
+let curves = [], N = 600;
+function buildCurves(){
+  const seed = hs.reduce((a,h)=>a*31+h.points,7);
+  const rnd = mulberry32(seed);
+  curves = hs.map(h=>{
+    const f=1.2+rnd()*2.6, ph=rnd()*6.283, a=.45+rnd()*.5, f2=4+rnd()*4, ph2=rnd()*6.283;
+    let w=[]; for(let i=0;i<N;i++){const x=i/N; w.push(Math.max(.05,1+a*Math.sin(6.283*f*x+ph)+.35*Math.sin(6.283*f2*x+ph2)+(rnd()-.5)*.5));}
+    for(let pass=0;pass<3;pass++) w=w.map((v,i)=>((w[i-1]??v)+v+(w[i+1]??v))/3);
+    const sum=w.reduce((a,b)=>a+b,0), c=new Float32Array(N+1); let acc=0;
+    for(let i=0;i<N;i++){acc+=w[i];c[i+1]=acc/sum*h.points;}
+    return c;
+  });
+}
+const scoreAt = p => curves.map((c,k)=>{ if(p>=1) return hs[k].points; const x=p*N,i=Math.floor(x),f=x-i; return c[i]+(c[i+1]-c[i])*f; });
+
+/* =====================================================
+   AUDIO  — synthesised in-browser (no files needed)
+   ===================================================== */
+const Snd = (()=>{
+  let ctx, master, comp, noise, timer, mode=null, nextT=0, step=0, muted=false, prog=()=>0, riserDone=false;
+  const mtof=n=>440*Math.pow(2,(n-69)/12);
+  const RACE_CH=[{r:45,t:[57,60,64,69]},{r:41,t:[53,57,60,65]},{r:48,t:[60,64,67,72]},{r:43,t:[55,59,62,67]}];
+  const WIN_CH =[{r:48,t:[60,64,67,72]},{r:43,t:[55,59,62,67]},{r:45,t:[57,60,64,69]},{r:41,t:[53,57,60,65]}];
+  function init(){
+    if(ctx){ if(ctx.state==='suspended') ctx.resume(); return; }
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    comp=ctx.createDynamicsCompressor(); master=ctx.createGain(); master.gain.value=muted?0:.75;
+    master.connect(comp); comp.connect(ctx.destination);
+    const len=ctx.sampleRate*2; noise=ctx.createBuffer(1,len,ctx.sampleRate);
+    const d=noise.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  }
+  function env(g,t,a,d,peak,end){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(Math.max(end,0.0001),t+a+d);}
+  function osc(type,f,t,dur,peak,cut){
+    const o=ctx.createOscillator(),g=ctx.createGain(),fl=ctx.createBiquadFilter();
+    o.type=type;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=cut||4000;
+    env(g,t,.01,dur,peak,.0005);o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+  }
+  function kick(t){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.14);
+    env(g,t,.003,.22,1.1,.001);o.connect(g);g.connect(master);o.start(t);o.stop(t+.3);}
+  function nz(t,dur,peak,type,freq,q){
+    const s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();s.buffer=noise;f.type=type;f.frequency.value=freq;if(q)f.Q.value=q;
+    env(g,t,.002,dur,peak,.0005);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.05);}
+  const snare=t=>{nz(t,.16,.55,'highpass',1800);osc('triangle',190,t,.1,.4,2000);};
+  const hat=(t,o)=>nz(t,o?.16:.04,o?.22:.16,'highpass',7500);
+  const crash=t=>nz(t,1.6,.7,'highpass',3500);
+  function riser(t,dur){
+    const s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();s.buffer=noise;s.loop=true;f.type='bandpass';f.Q.value=3;
+    f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(9000,t+dur);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.55,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+.05);
+    s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.1);
+  }
+  function sched(st,t){
+    const p=mode==='race'?prog():1, ch=(mode==='race'?RACE_CH:WIN_CH)[Math.floor(st/16)%4], s=st%16;
+    // drums
+    if(s%4===0) kick(t); else if(p>.55&&mode==='race'&&s===14) kick(t);
+    if((s===4||s===12)&&(p>.12||mode==='win')){snare(t); if(mode==='win')nz(t,.12,.3,'bandpass',2500,1);}
+    if(s%4===2) hat(t,true); else if(p>.35&&s%2===1) hat(t,false);
+    // bass
+    if(s%2===0) osc('sawtooth',mtof(ch.r+(s%8===6?12:0)),t,.2,.5,500+p*900);
+    // arpeggio lead
+    const idx=[0,1,2,3,2,1,2,3,0,1,2,3,3,2,1,2][s];
+    if(p>.08||mode==='win'){ osc('sawtooth',mtof(ch.t[idx]+12),t,.14,.16,1200+p*5000);
+      if(mode==='win'||p>.5) osc('square',mtof(ch.t[idx]+24),t,.08,.05,3500); }
+    // pad stab on bar start
+    if(s===0&&p>.25) ch.t.forEach(n=>osc('sawtooth',mtof(n),t,.5,.07,1500+p*2000));
+  }
+  function tick(){
+    if(!ctx||!mode) return;
+    while(nextT<ctx.currentTime+.15){
+      const p=mode==='race'?prog():1;
+      sched(step,nextT);
+      const bpm=mode==='race'?118+44*p:126;
+      nextT+=60/bpm/4; step++;
+      if(mode==='race'&&!riserDone&&p>.86){riserDone=true;riser(nextT,Math.max(1.5,(1-p)*RACE_SECONDS+HOLD_FINAL_MS/1000-.4));}
+    }
+  }
+  return {
+    init, setProgress(fn){prog=fn},
+    startRace(){init();stop();mode='race';step=0;riserDone=false;nextT=ctx.currentTime+.05;timer=setInterval(tick,25);},
+    startWin(){init();stop();mode='win';step=0;nextT=ctx.currentTime+.05;timer=setInterval(tick,25);},
+    stop(){clearInterval(timer);mode=null;},
+    beep(f,d){init();const t=ctx.currentTime;osc('square',f,t,d,.3,6000);},
+    fanfare(){init();const t=ctx.currentTime;crash(t);kick(t);
+      [[60,64,67,72],[62,67,71,74],[64,67,72,76],[67,72,76,79]].forEach((c,i)=>c.forEach(n=>{osc('sawtooth',mtof(n),t+i*.16,.5,.18,5000);osc('square',mtof(n+12),t+i*.16,.4,.06,6000);}));},
+    crash(){init();crash(ctx.currentTime);kick(ctx.currentTime);},
+    mute(m){muted=m;if(master)master.gain.value=m?0:.75;},
+    isMuted:()=>muted
+  };
+})();
+
+/* =====================================================
+   RACE
+   ===================================================== */
+let raf=0, t0=0, rows=[], lastLeader=null, running=false, tickerTO=0;
+function buildBoard(){
+  const board=$('#board'); board.innerHTML=''; rows=[];
+  hs.forEach((h,i)=>{
+    const r=document.createElement('div'); r.className='row';
+    r.style.setProperty('--c',h.color);r.style.setProperty('--edge',h.edge);r.style.setProperty('--t',h.text);r.style.setProperty('--glow',h.glow);
+    r.innerHTML='<div class="rank"></div><div class="track"><div class="bar"></div><b class="nm2">'+h.name+'</b></div><div class="pts">0</div>';
+    r.querySelector('.bar').appendChild(badge(h));
+    board.appendChild(r); rows.push({el:r,nm:r.querySelector('.nm2'),rank:r.querySelector('.rank'),bar:r.querySelector('.bar'),pts:r.querySelector('.pts')});
+  });
+}
+function paint(sc,p){
+  const maxFinal=Math.max(...hs.map(h=>h.points))||1, axis=maxFinal*1.04;
+  const order=sc.map((v,i)=>i).sort((a,b)=>sc[b]-sc[a]);
+  order.forEach((k,rank)=>{
+    const r=rows[k];
+    r.el.style.setProperty('--rank',rank); r.el.classList.toggle('lead',rank===0);
+    r.rank.textContent=rank+1;
+    const w=sc[k]/axis*62; r.bar.style.width=w+'%'; r.nm.style.left='calc('+w+'% + var(--rowH)*.45)';
+    r.pts.textContent=fmt(sc[k]);
+  });
+  $('#progFill').style.width=(p*100)+'%'; $('#progFlag').style.left=(p*100)+'%';
+  const leader=order[0];
+  if(lastLeader!==null && leader!==lastLeader && p<.97) say('🔥 '+hs[leader].name+' take the lead!');
+  lastLeader=leader;
+}
+function say(msg){const t=$('#ticker');t.textContent=msg;t.classList.add('show');clearTimeout(tickerTO);tickerTO=setTimeout(()=>t.classList.remove('show'),2200);}
+
+function countdown(cb){
+  const c=$('#count'),n=$('#countNum'); c.classList.add('on'); let k=3;
+  (function step(){
+    n.textContent=k>0?k:'GO!'; c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+    Snd.beep(k>0?660:1320,k>0?.18:.6);
+    if(k>0){k--;setTimeout(step,900);} else setTimeout(()=>{c.classList.remove('on');cb();},650);
+  })();
+}
+
+function startRace(){
+  cancelAnimationFrame(raf); running=true; lastLeader=null;
+  Snd.init(); Snd.stop(); show('race'); buildBoard();
+  paint(scoreAt(0),0); $('#ticker').classList.remove('show');
+  countdown(()=>{
+    t0=performance.now(); Snd.setProgress(()=>Math.min(1,(performance.now()-t0)/(RACE_SECONDS*1000))); Snd.startRace();
+    const loop=now=>{
+      if(!running) return;
+      const p=Math.min(1,(now-t0)/(RACE_SECONDS*1000));
+      paint(scoreAt(p),p);
+      if(p<1) raf=requestAnimationFrame(loop); else finishRace();
+    };
+    raf=requestAnimationFrame(loop);
+  });
+}
+function finishRace(){
+  running=false; Snd.stop(); Snd.crash();
+  $('#ticker').textContent='🏁 FINAL STANDINGS!'; $('#ticker').classList.add('show');
+  const f=$('#finalflash'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+  setTimeout(showFinish,HOLD_FINAL_MS);
+}
+function skip(){ if(!running) return; running=false; cancelAnimationFrame(raf); Snd.stop(); paint(scoreAt(1),1); showFinish(); }
+
+/* =====================================================
+   FINISH + CONFETTI
+   ===================================================== */
+function showFinish(){
+  $('#finalflash').classList.remove('on'); $('#count').classList.remove('on');
+  const order=[...hs].sort((a,b)=>b.points-a.points), w=order[0];
+  show('finish');
+  const fin=$('#finish'); fin.style.setProperty('--wglow',w.glow.replace(/[\d.]+\)$/,'.5)')); 
+  const wb=$('#winnerBlock'); wb.innerHTML=''; wb.style.setProperty('--wc',w.id==='scorpions'?'#e9e9f5':w.color==='#f3f5fa'?'#fff':w.color);
+  wb.appendChild(badge(w)); const t=document.createElement('div'); t.textContent='🏆 '+w.name+' 🏆'; wb.appendChild(t);
+  const st=$('#stand'); st.innerHTML='';
+  order.forEach((h,i)=>{
+    const r=document.createElement('div'); r.className='srow'; r.style.setProperty('--c',h.id==='scorpions'?'#b9b9cc':h.color); r.style.animationDelay=(.3+i*.35)+'s';
+    const gap=i===0?'':'−'+fmt(w.points-h.points)+' behind';
+    r.innerHTML='<div class="n">'+(i+1)+'</div><div class="nm">'+h.name+'</div><div class="gap">'+gap+'</div><div class="p">'+fmt(h.points)+'</div>';
+    r.insertBefore(badge(h),r.querySelector('.nm')); st.appendChild(r);
+  });
+  Snd.fanfare(); setTimeout(()=>{ if($('#finish').classList.contains('active')) Snd.startWin(); },900);
+  startConfetti();
+}
+let cf={raf:0,parts:[]};
+function startConfetti(){
+  const cv=$('#confetti'),cx=cv.getContext('2d'); cancelAnimationFrame(cf.raf);
+  const fit=()=>{cv.width=innerWidth;cv.height=innerHeight}; fit(); addEventListener('resize',fit);
+  const cols=['#ffd24a','#fff','#e1243c','#1fab5a','#9aa6c4','#4aa3ff'];
+  cf.parts=[]; const spawn=n=>{for(let i=0;i<n;i++)cf.parts.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.4,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,
+    s:6+Math.random()*9,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[Math.random()*cols.length|0]});};
+  spawn(260); let frames=0;
+  (function loop(){
+    if(!$('#finish').classList.contains('active')) return;
+    cx.clearRect(0,0,cv.width,cv.height); frames++; if(frames%90===0) spawn(120);
+    cf.parts=cf.parts.filter(p=>p.y<cv.height+30);
+    cf.parts.forEach(p=>{p.x+=p.vx+Math.sin(p.y/40);p.y+=p.vy;p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore();});
+    cf.raf=requestAnimationFrame(loop);
+  })();
+}
+
+/* =====================================================
+   WIRING
+   ===================================================== */
+function setMute(m){Snd.mute(m);const l=m?'🔇':'🔊';$('#muteBtn').textContent=l;$('#muteBtn2').textContent=l+' Sound';}
+$('#startBtn').onclick=startRace;
+$('#replayBtn').onclick=()=>{Snd.stop();startRace();};
+$('#skipBtn').onclick=skip;
+$('#muteBtn').onclick=$('#muteBtn2').onclick=()=>setMute(!Snd.isMuted());
+loadData();
+</script>
+</body>
+</html>
