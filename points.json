@@ -5,5 +5,14 @@
     "gazelles": 3464,
     "falcons": 3879,
     "scorpions": 3669
+  },
+  "prev": {
+    "label": "12 Nov 2026",
+    "points": {
+      "wolves": 2474,
+      "gazelles": 2512,
+      "falcons": 2637,
+      "scorpions": 2697
+    }
   }
 }
